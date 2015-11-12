@@ -60,6 +60,10 @@ namespace emscripten {
                 size_t charSize,
                 const char* name);
 
+            void _embind_register_std_u16string(
+                TYPEID stringType,
+                const char* name);
+
             void _embind_register_emval(
                 TYPEID emvalType,
                 const char* name);

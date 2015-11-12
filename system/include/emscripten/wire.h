@@ -286,6 +286,23 @@ namespace emscripten {
             }
         };
 
+        template<>
+        struct BindingType<std::u16string> {
+            typedef struct {
+                size_t length;
+                char16_t data[1]; // trailing data
+            }* WireType;
+            static WireType toWireType(const std::u16string& v) {
+                WireType wt = (WireType)malloc(sizeof(size_t) + v.length() * sizeof(char16_t));
+                wt->length = v.length();
+                memcpy(wt->data, v.data(), v.length() * sizeof(char16_t));
+                return wt;
+            }
+            static std::u16string fromWireType(WireType v) {
+                return std::u16string(v->data, v->length);
+            }
+        };
+
         template<typename T>
         struct BindingType<const T> : public BindingType<T> {
         };

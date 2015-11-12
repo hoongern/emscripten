@@ -695,6 +695,44 @@ var LibraryEmbind = {
     });
   },
 
+  _embind_register_std_u16string__deps: [
+    'free', 'malloc', '$readLatin1String', '$registerType',
+    '$simpleReadValueFromPointer'],
+  _embind_register_std_u16string: function(rawType, name) {
+    name = readLatin1String(name);
+    var charSize = 2;
+    registerType(rawType, {
+        name: name,
+        'fromWireType': function(value) {
+            var length = HEAPU32[value >> 2];
+            var a = new Array(length);
+            var start = (value + 4) >> 1;
+            for (var i = 0; i < length; ++i) {
+                a[i] = String.fromCharCode(HEAPU16[start + i]);
+            }
+            _free(value);
+            return a.join('');
+        },
+        'toWireType': function(destructors, value) {
+            // assumes 4-byte alignment
+            var length = value.length;
+            var ptr = _malloc(4 + length * charSize);
+            HEAPU32[ptr >> 2] = length;
+            var start = (ptr + 4) >> 1;
+            for (var i = 0; i < length; ++i) {
+                HEAPU16[start + i] = value.charCodeAt(i);
+            }
+            if (destructors !== null) {
+                destructors.push(_free, ptr);
+            }
+            return ptr;
+        },
+        'argPackAdvance': 8,
+        'readValueFromPointer': simpleReadValueFromPointer,
+        destructorFunction: function(ptr) { _free(ptr); },
+    });
+  },
+
   _embind_register_emval__deps: [
     '_emval_decref', '$emval_handle_array', '_emval_register',
     '$readLatin1String', '$registerType', '$simpleReadValueFromPointer'],

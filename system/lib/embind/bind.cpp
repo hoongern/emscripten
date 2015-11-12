@@ -116,6 +116,7 @@ EMSCRIPTEN_BINDINGS(native_and_builtin_types) {
     _embind_register_std_string(TypeID<std::string>::get(), "std::string");
     _embind_register_std_string(TypeID<std::basic_string<unsigned char> >::get(), "std::basic_string<unsigned char>");
     _embind_register_std_wstring(TypeID<std::wstring>::get(), sizeof(wchar_t), "std::wstring");
+    _embind_register_std_u16string(TypeID<std::u16string>::get(), "std::u16string");
     _embind_register_emval(TypeID<val>::get(), "emscripten::val");
 
     // Some of these types are aliases for each other. Luckily,
