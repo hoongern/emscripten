@@ -443,10 +443,31 @@ module({
             assert.equal(expected, cm.take_and_return_std_wstring(expected));
         });
 
+        test("non-ascii u16strings", function() {
+            var expected = String.fromCharCode(10) +
+                String.fromCharCode(1234) +
+                String.fromCharCode(2345) +
+                String.fromCharCode(65535);
+            assert.equal(expected, cm.get_non_ascii_u16string());
+        });
+
+        test("passing unicode string into C++ u16string", function() {
+            var expected = String.fromCharCode(10) +
+                String.fromCharCode(1234) +
+                String.fromCharCode(2345) +
+                String.fromCharCode(65535);
+            assert.equal(expected, cm.take_and_return_std_u16string(expected));
+        });
+
         if (cm.isMemoryGrowthEnabled) {
             test("can access a literal wstring after a memory growth", function() {
                 cm.force_memory_growth();
                 assert.equal("get_literal_wstring", cm.get_literal_wstring());
+            });
+
+            test("can access a literal u16string after a memory growth", function() {
+                cm.force_memory_growth();
+                assert.equal("get_literal_u16string", cm.get_literal_u16string());
             });
         }
 
@@ -2433,6 +2454,7 @@ module({
 
             assert.equal("foo", cm.val_as_string("foo"));
             assert.equal("foo", cm.val_as_wstring("foo"));
+            assert.equal("foo", cm.val_as_u16string("foo"));
 
             var obj = {};
             assert.equal(obj, cm.val_as_val(obj));

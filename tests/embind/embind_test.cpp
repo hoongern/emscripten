@@ -125,6 +125,19 @@ std::wstring get_literal_wstring() {
     return L"get_literal_wstring";
 }
 
+std::u16string get_non_ascii_u16string() {
+    std::u16string us(4, 0);
+    us[0] = 10;
+    us[1] = 1234;
+    us[2] = 2345;
+    us[3] = 65535;
+    return us;
+}
+
+std::u16string get_literal_u16string() {
+    return u"get_literal_u16string";
+}
+
 void force_memory_growth() {
     auto heapu8 = val::global("Module")["HEAPU8"];
     delete [] new char[heapu8["byteLength"].as<size_t>() + 1];
@@ -147,6 +160,10 @@ std::basic_string<unsigned char> emval_test_take_and_return_std_basic_string_uns
 }
 
 std::wstring take_and_return_std_wstring(std::wstring str) {
+    return str;
+}
+
+std::u16string take_and_return_std_u16string(std::u16string str) {
     return str;
 }
 
@@ -1667,6 +1684,8 @@ EMSCRIPTEN_BINDINGS(tests) {
     function("get_non_ascii_string", &get_non_ascii_string);
     function("get_non_ascii_wstring", &get_non_ascii_wstring);
     function("get_literal_wstring", &get_literal_wstring);
+    function("get_non_ascii_u16string", &get_non_ascii_u16string);
+    function("get_literal_u16string", &get_literal_u16string);
     function("force_memory_growth", &force_memory_growth);
 
     //function("emval_test_take_and_return_const_char_star", &emval_test_take_and_return_const_char_star);
@@ -1674,6 +1693,7 @@ EMSCRIPTEN_BINDINGS(tests) {
     function("emval_test_take_and_return_std_string_const_ref", &emval_test_take_and_return_std_string_const_ref);
     function("emval_test_take_and_return_std_basic_string_unsigned_char", &emval_test_take_and_return_std_basic_string_unsigned_char);
     function("take_and_return_std_wstring", &take_and_return_std_wstring);
+    function("take_and_return_std_u16string", &take_and_return_std_u16string);
 
     //function("emval_test_take_and_return_CustomStruct", &emval_test_take_and_return_CustomStruct);
 
@@ -2576,6 +2596,7 @@ EMSCRIPTEN_BINDINGS(val_as) {
 
     function("val_as_string", &val_as<std::string>);
     function("val_as_wstring", &val_as<std::wstring>);
+    function("val_as_u16string", &val_as<std::u16string>);
     function("val_as_val", &val_as<val>);
 
     function("val_as_value_object", &val_as<StructVector>);
