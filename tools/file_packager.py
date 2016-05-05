@@ -48,6 +48,8 @@ Usage:
   --use-preload-plugins Tells the file packager to run preload plugins on the files as they are loaded. This performs tasks like decoding images
                         and audio using the browser's codecs.
 
+  --4-byte-aligned Aligns start of data files to 4 byte boundaries. Useful for codebases requiring 4-byte aligned pointers with mmap().
+
 Notes:
 
   * The file packager generates unix-style file paths. So if you are on windows and a file is accessed at
@@ -107,6 +109,7 @@ no_heap_copy = True
 separate_metadata  = False
 lz4 = False
 use_preload_plugins = False
+four_byte_alignment = False
 
 for arg in sys.argv[2:]:
   if arg == '--preload':
@@ -155,6 +158,8 @@ for arg in sys.argv[2:]:
     plugin = open(arg.split('=')[1], 'r').read()
     eval(plugin) # should append itself to plugins
     leading = ''
+  elif arg.startswith('--4-byte-aligned'):
+    four_byte_alignment = True
   elif leading == 'preload' or leading == 'embed':
     mode = leading
     uses_at_notation = '@' in arg.replace('@@', '') # '@@' in input string means there is an actual @ character, a single '@' means the 'src@dst' notation.
@@ -395,6 +400,11 @@ if has_preloaded:
     #print >> sys.stderr, 'bundling', file_['srcpath'], file_['dstpath'], file_['data_start'], file_['data_end']
     start += len(curr)
     data.write(curr)
+    if four_byte_alignment:
+      padding_bytes = file_['data_end'] % 4
+      for i in range(padding_bytes):
+        data.write("\x00")
+      start += padding_bytes
   data.close()
   # TODO: sha256sum on data_target
   if start > 256*1024*1024:
