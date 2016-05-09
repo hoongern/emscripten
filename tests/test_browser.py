@@ -1136,6 +1136,14 @@ keydown(100);keyup(100); // trigger the end
     Popen([PYTHON, FILE_PACKAGER, 'files.data', '--preload', 'file1.txt', os.path.join('sub', 'file2.txt'), '--separate-metadata', '--js-output=files.js']).communicate()
     self.btest(os.path.join('fs', 'test_workerfs_package.cpp'), '1', args=['--proxy-to-worker'])
 
+  def test_fs_4byte_aligned_package(self):
+    open('file1.txt', 'w').write('Hello World')
+    open('file2.txt', 'w').write('Bye')
+    out = subprocess.check_output([PYTHON, FILE_PACKAGER, 'files.data', '--preload', 'file1.txt', 'file2.txt'])
+    open('files.js', 'wb').write(out)
+    print out
+    self.btest(os.path.join('fs', 'test_fs_4byte_aligned.c'), '1', args=['--pre-js', 'files.js'], timeout=60)
+  
   def test_fs_lz4fs_package(self):
     # generate data
     import random
