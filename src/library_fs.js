@@ -412,7 +412,7 @@ mergeInto(LibraryManager.library, {
       return stream;
     },
     closeStream: function(fd) {
-      FS.streams[fd] = null;
+      if (FS.streams[fd] && !FS.streams[fd].mmapRefCount) FS.streams[fd] = null;
     },
 
     //
@@ -1148,6 +1148,7 @@ mergeInto(LibraryManager.library, {
       if (!stream.stream_ops.mmap) {
         throw new FS.ErrnoError(ERRNO_CODES.ENODEV);
       }
+      stream.mmapRefCount = (stream.mmapRefCount || 0) + 1;
       return stream.stream_ops.mmap(stream, buffer, offset, length, position, prot, flags);
     },
     msync: function(stream, buffer, offset, length, mmapFlags) {
@@ -1157,6 +1158,7 @@ mergeInto(LibraryManager.library, {
       return stream.stream_ops.msync(stream, buffer, offset, length, mmapFlags);
     },
     munmap: function(stream) {
+      if (--stream.mmapRefCount < 1) FS.close(stream);
       return 0;
     },
     ioctl: function(stream, cmd, arg) {
